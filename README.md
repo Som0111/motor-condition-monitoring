@@ -93,7 +93,7 @@ and reports whichever line clears it by the largest margin. Zero training.
 | **Ball** | 79 | 0 | 14 | 0 |
 | **Outer Race** | 0 | 0 | 0 | 92 |
 
-Three of four classes are perfect with **zero false alarms on healthy bearings**.
+Three of four classes are perfect with zero false alarms on healthy bearings.
 Every error is the ball fault being called healthy.
 
 ### Two honest caveats
@@ -128,9 +128,9 @@ equal-width bands, reusing the same `butter` + `hilbert` path as
 `envelope_spectrum()`) and reports SK per band; `select_band()` returns
 `argmax`. Two implementation details mattered and are worth flagging:
 
-- **`kurtosis(|c|)` is not `SK`.** They look interchangeable — both are "how
+- `kurtosis(|c|)` is not `SK`. They look interchangeable — both are "how
   peaky is the envelope" — but they aren't. Plain kurtosis of the envelope
-  amplitude *systematically selects the band next to the true resonance*,
+  amplitude systematically selects the band next to the true resonance,
   because a transient leaking through a steep filter skirt is sparser (and so
   scores higher on ordinary kurtosis) than the sustained ring inside the
   actual resonance band. Verified on a synthetic 40 Hz-repetition transient
@@ -138,7 +138,7 @@ equal-width bands, reusing the same `butter` + `hilbert` path as
   neighboring band in every trial; Antoni's `⟨|c|⁴⟩/⟨|c|²⟩² − 2` on the same
   filter bank landed on the correct band every time. This is now the
   self-check in `_self_check()`.
-- **Minimum bandwidth is not a tuning knob.** A demodulation band of width W
+- Minimum bandwidth is not a tuning knob. A demodulation band of width W
   only has envelope content up to ~W/2, so reading defect lines out to the
   500 Hz ceiling of `envelope_spectrum()` requires W ≥ 1000 Hz. Without that
   floor the kurtogram happily selects a 188 Hz-wide band (`KURT_MIN_BW`
@@ -146,7 +146,7 @@ equal-width bands, reusing the same `butter` + `hilbert` path as
   the median noise floor, and makes every peak — real or not — look enormous.
   `KURT_MIN_BW = 1000.0` enforces the floor as a correctness constraint.
 
-**Result, with both fixes in place:**
+With both fixes in place, here is what the kurtogram actually selects:
 
 ![ball fault kurtogram](plots/kurtogram_ball_fault_B007.png)
 ![outer race kurtogram](plots/kurtogram_outer_race_OR007.png)
@@ -158,25 +158,25 @@ equal-width bands, reusing the same `butter` + `hilbert` path as
 | Ball | 2000–3000 Hz | 0.33 | 0% |
 | Outer Race | 2000–4000 Hz | 3.08 | 100% |
 
-Fixed band: **83.2%** overall. Kurtogram band: **80.3%** overall — IR and OR
-essentially match the fixed band (as expected, since 2–5 kHz already covers
-their resonances), but **ball fault recall goes from 15% to 0%**: every ball
-window is now called Outer Race, because the ball's max-SK band (2000–3000 Hz,
-SK = 0.33) is barely non-Gaussian — an order of magnitude lower than IR's or
-OR's own bands — and happens to contain more BPFO leakage than BSF energy.
+Fixed band: 83.2% overall. Kurtogram band: 80.3% overall — IR and OR essentially
+match the fixed band, as expected, since 2–5 kHz already covers their resonances.
+But ball fault recall goes from 15% to 0%: every ball window is now called Outer
+Race, because the ball's max-SK band (2000–3000 Hz, SK = 0.33) is barely
+non-Gaussian — an order of magnitude lower than IR's or OR's own bands — and
+happens to contain more BPFO leakage than BSF energy.
 
-**Honest conclusion: the kurtogram does not fix the ball fault, and that is
-itself informative.** SK = 0.33 says what the search already found by brute
-force — this signal has no band where a ball-defect transient stands out from
-the rest of the spectrum. A 0.007" ball defect only loads intermittently as it
-rotates through the load zone, and its impact is damped by the cage and
-lubricant film before it can ring any resonance sharply; the energy stays
-smeared rather than concentrating in one band or one frequency line. This
-matches the CWRU literature, where B007 is widely reported as the hardest of
-the four standard classes. A method that could still separate it — cepstral
-prewhitening, wavelet-packet energy features, or simply the RMS/kurtosis
-features from Step 5, which is what the RandomForest in Step 7 actually uses
-— is a different technique, not a better band.
+The kurtogram does not fix the ball fault, and that is itself informative: SK =
+0.33 says what the brute-force search already found, that this signal has no
+band where a ball-defect transient stands out from the rest of the spectrum. A
+0.007" ball defect only loads intermittently as it rotates through the load
+zone, and its impact is damped by the cage and lubricant film before it can
+ring any resonance sharply; the energy stays smeared rather than concentrating
+in one band or one frequency line. This matches the CWRU literature, where
+B007 is widely reported as the hardest of the four standard classes. A method
+that could still separate it — cepstral prewhitening, wavelet-packet energy
+features, or simply the RMS/kurtosis features from Step 5, which is what the
+RandomForest in Step 7 actually uses — is a different technique, not a better
+band.
 
 ## Step 7 — RandomForest cross-check
 
@@ -197,7 +197,7 @@ window-overlap leakage).
 | env_amp_bsf | 0.102 |
 | crest_factor | 0.068 |
 
-**The three envelope-at-defect-frequency features carry 52% of the importance** —
+The three envelope-at-defect-frequency features carry 52% of the importance —
 more than the three generic time-domain features combined. That validates the
 physics rather than replacing it: the model is leaning on the same lines the
 kinematic equations predicted. It separates Ball where the rule could not, but it
