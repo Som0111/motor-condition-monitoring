@@ -1,5 +1,8 @@
 # Bearing Fault Diagnosis via Envelope Spectrum Analysis
 
+Part of a broader motor condition monitoring toolkit — this piece covers
+vibration-based bearing fault detection.
+
 Diagnosing rolling-element bearing faults from raw vibration signals — no
 training, no deep learning. Uses envelope (Hilbert) spectrum analysis to pull
 out fault frequencies that don't show up in a plain FFT. A RandomForest is
