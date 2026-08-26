@@ -56,28 +56,34 @@ just noise the model happened to fit.
 
 ## Two things worth flagging
 
-**Threshold calibration matters.** A fixed multiplier (3x noise floor) gives
-75.2% with false alarms on healthy bearings — because a max-over-a-window
-peak sits 2-3x above a median noise floor even on pure noise. Calibrating
-the threshold from healthy-baseline data only (no fault data used) pushes it
-to 83.2% with zero false alarms. This is basically how alarm limits get set
-in the field.
+First one: I initially just used a flat 3x-the-noise-floor cutoff for the
+rule-based check, and it only got 75.2%, with a bunch of healthy bearings
+flagged as faulty. Turns out that's just how the math works out — a peak
+picked as the max over a window naturally sits 2-3x above a median noise
+floor even when there's no fault at all, so 3x was never a fair cutoff to
+begin with. Once I calibrated the threshold off healthy data only (never
+touching the fault windows), accuracy went to 83.2% and the false alarms
+disappeared. Which, now that I think about it, is basically how you'd set
+an alarm limit on a real machine anyway — you don't guess a number, you
+look at what "normal" actually looks like first.
 
-**Ball faults don't show up in a fixed 2-5 kHz band.** Tried widening the
-search — different bands, 2x the theoretical frequency — nothing found a
-clean BSF line that a healthy bearing didn't also show. Also tried a
-kurtogram (Antoni, 2006) to auto-select the best band per fault — it
-correctly confirms inner/outer race resonances, but for the ball fault the
-max spectral kurtosis is 0.33, an order of magnitude below the other two
-faults, meaning there's genuinely no clean resonance to find here, not a
-tuning problem. My guess is it comes down to the defect itself: a ball only
-loads up when it rolls through the load zone, and each impact gets damped by
-the cage and lubricant film before it can ring any single resonance sharply.
-Inner and outer race defects sit in a fixed spot that gets struck the same
-way every pass, so their impacts are more repeatable and excite a
-resonance cleanly. A ball defect's contact geometry keeps changing as it
-spins, so the energy ends up smeared across frequencies instead of
-concentrated in one band. [TODO: replace with your own reasoning]
+Second, and this one took longer to accept: the ball fault just doesn't
+show up cleanly in a fixed 2-5 kHz band, no matter what I did. I tried
+other bands, I tried looking at 2x the expected frequency in case I had the
+harmonic wrong, nothing gave me a BSF peak that a healthy bearing wasn't
+also showing. So I brought in a kurtogram (Antoni, 2006) to let the
+algorithm pick the best band per fault instead of me guessing one band for
+everything. It nailed the inner and outer race cases, but for the ball
+fault the best band it could find had a spectral kurtosis of 0.33 — an
+order of magnitude worse than the other two. That's not a tuning issue,
+that's the algorithm telling me there's no clean resonance to find. My
+best guess for why: a ball defect only makes contact when it rolls through
+the load zone, and the cage and the lubricant film soak up a lot of that
+impact before it can ring anything sharply. Inner and outer race defects
+get struck at the same spot every single pass, so they're more repeatable
+and excite a resonance cleanly, whereas a ball's contact point keeps
+shifting as it spins, so the energy just smears out instead of piling up
+in one place.
 
 ## What I'd add with more time
 
