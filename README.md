@@ -64,9 +64,7 @@ remove DC → FFT. This recovers the impact *rate* from the amplitude modulation
 ## Step 5 — Features
 
 Six features per 1-second window (`results/feature_dataset.csv`): RMS, kurtosis,
-crest factor, and envelope amplitude at BPFO / BPFI / BSF (±2 Hz).
-
-Class means:
+crest factor, and envelope amplitude at BPFO / BPFI / BSF (±2 Hz). Class means:
 
 | label | rms | kurtosis | crest | env@BPFO | env@BPFI | env@BSF |
 |---|---|---|---|---|---|---|
@@ -75,8 +73,8 @@ Class means:
 | Ball | 0.139 | -0.03 | 4.02 | 0.0115 | 0.0109 | 0.0155 |
 | Outer Race | 0.669 | 4.62 | 5.14 | **0.5385** | 0.0099 | 0.0239 |
 
-The diagonal is the whole story: each fault lights up its own theoretical
-frequency by 25–2700× over the healthy baseline.
+**The diagonal is the whole story: each fault lights up its own theoretical
+frequency by 25–2700× over the healthy baseline.**
 
 ## Step 6 — Rule-based diagnosis (primary method)
 
