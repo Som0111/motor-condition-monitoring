@@ -11,6 +11,14 @@ drive-end accelerometer, 12 kHz, 0.007" defects, ~1797 rpm.
 python bearing_diagnosis.py
 ```
 
+## Why I picked this problem
+
+I picked bearing faults because it's the failure mode that actually kills
+motors in real plants, not because it's a popular ML dataset. Most bearing
+failures don't announce themselves until it's too late, and vibration
+analysis is one of the few ways to catch it while it's still just a
+maintenance job instead of a breakdown.
+
 ## The bearing
 
 SKF 6205-2RS deep groove ball bearing (CWRU drive end): n = 9 balls,
@@ -231,6 +239,16 @@ results/feature_dataset.csv                      471 windows x 6 features + labe
 results/feature_dataset_kurtogram.csv            same, kurtogram-selected band per class
 bearing_diagnosis.py                             everything above
 ```
+
+## What surprised me
+
+The measured RPM in the files wasn't exactly 1797 like the CWRU documentation
+says — for the Normal file it's 1796 (`X097RPM`). Small difference, but it
+meant my "theoretical" defect frequencies were only right because I used the
+real measured speed instead of the textbook number. And more interestingly,
+the ball fault flat-out didn't show up in a plain fixed-band envelope
+spectrum — I assumed all three fault types would behave the same way, and
+they don't.
 
 ## Real-world context
 
