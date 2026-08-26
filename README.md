@@ -1,3 +1,8 @@
+<!-- TODO(soumya): rewrite "What surprised me", "What I learned", and
+"Real-world context" sections in your own words before submitting anywhere.
+Also reread Step 6c's closing paragraph and Step 7's closing paragraph -
+these read most obviously AI-written and need your own phrasing. -->
+
 # Bearing Fault Diagnosis via Envelope Spectrum Analysis
 
 Diagnosing rolling-element bearing faults from raw vibration by demodulating the

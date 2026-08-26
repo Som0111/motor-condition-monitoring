@@ -34,6 +34,7 @@ BAND = (2000, 5000)        # fixed resonance band for envelope demodulation
 # Nyquist, where the filter design degenerates and fakes kurtosis in the 100s.
 # min_bw = 2 x the 500 Hz envelope range: a W-wide band only carries envelope
 # content up to ~W/2, so anything narrower leaves the noise floor empty.
+# KURT_MIN_BW enforced after unconstrained search picked a 188Hz band with no signal
 KURT_LEVELS, KURT_FMIN, KURT_FMAX, KURT_MIN_BW = 6, 1000.0, 5400.0, 1000.0
 TOL = 2.0                  # +-Hz tolerance when reading a defect-frequency peak
 DATA_DIR = "cwru_data"
@@ -169,6 +170,7 @@ def kurtogram(signal, fs=FS, levels=KURT_LEVELS, fmin=KURT_FMIN,
                 continue
             b, a = butter(4, [lo / (fs / 2), hi / (fs / 2)], btype="bandpass")
             env = np.abs(hilbert(filtfilt(b, a, signal)))
+            # first attempt used kurtosis(|c|) directly - picked wrong band, see README step 6c
             sk = np.mean(env ** 4) / np.mean(env ** 2) ** 2 - 2
             out.append((bw, lo, hi, float(sk)))
     if not out:
@@ -253,6 +255,8 @@ def calibrate_threshold(df, healthy="Normal", margin=1.2):
     pure noise, so the nominal 3.0 alarms on healthy bearings. Field practice is
     to take the worst ratio ever seen on a known-good machine and add margin.
     """
+    # first attempt used a fixed threshold of 3.0 - false-alarmed on 60/194
+    # healthy windows, replaced with this healthy-baseline calibration
     h = df[df["label"] == healthy]
     worst = max((h[c] / h["baseline_noise"]).max()
                 for c in ("env_amp_bpfo", "env_amp_bpfi", "env_amp_bsf"))
