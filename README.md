@@ -118,7 +118,7 @@ either. See below.
 
 ## Step 6c — Kurtogram band selection (does the ball fault need a different band?)
 
-Antoni (2006)¹ proposes selecting the demodulation band by maximizing the
+Antoni, 2006 — see link in References below — proposes selecting the demodulation band by maximizing the
 **spectral kurtosis (SK)** of the envelope, rather than fixing one band for
 every fault type: `SK = ⟨|c|⁴⟩ / ⟨|c|²⟩² − 2` on the complex analytic signal
 `c = hilbert(bandpass(x))`. A band dominated by transient impacts has a
@@ -179,10 +179,6 @@ the four standard classes. A method that could still separate it — cepstral
 prewhitening, wavelet-packet energy features, or simply the RMS/kurtosis
 features from Step 5, which is what the RandomForest in Step 7 actually uses
 — is a different technique, not a better band.
-
-¹ Antoni, J. (2006). "The spectral kurtosis: a useful tool for characterising
-non-stationary signals." *Mechanical Systems and Signal Processing*, 20(2),
-282–307.
 
 ## Step 7 — RandomForest cross-check
 
@@ -291,3 +287,8 @@ in advance and checked the algorithm against it, which is now baked into the
 script as a permanent regression test. That's probably the real takeaway:
 for a signal-processing method, trust it exactly as much as you've verified
 it on a case where you already know the answer.
+
+## References
+
+Antoni, J. (2006), spectral kurtosis paper:
+https://www.sciencedirect.com/science/article/abs/pii/S0888327004001217
