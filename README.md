@@ -252,8 +252,42 @@ they don't.
 
 ## Real-world context
 
-[TODO - fill in]
+This is basically what a vibration analyst walks around a plant doing with a
+handheld accelerometer, except automated. In a real condition-monitoring
+setup, this pipeline (or something like it) would sit behind a fixed
+accelerometer on a motor's drive-end bearing, take a 1-second snapshot every
+few minutes, and run the rule-based check — not the RandomForest — because
+the rule-based check doesn't need to be retrained every time a plant swaps in
+a different motor or bearing size. You just recompute BPFO/BPFI/BSF from the
+new geometry and RPM and the thresholds still mean something. That's the
+actual selling point over an ML model here: physics generalizes to a bearing
+it's never seen, a trained classifier doesn't.
+
+The ball-fault miss also isn't just an academic footnote. In a real plant
+that's the fault class you'd most want a second layer for — probably RMS/
+kurtosis trend alarms as a backstop, since Step 7 showed those are what
+actually caught it, not the envelope spectrum. A real deployment would run
+both: the physics-based check as the explainable first line, and simple
+statistical drift as a catch-all for whatever the physics-based check can't
+resolve cleanly.
 
 ## What I learned
 
-[TODO - fill in]
+Going in, I expected envelope analysis to be a fixed recipe — bandpass here,
+Hilbert transform, done. What actually took the time was everything around
+that one transform: picking a band that doesn't lie to you, setting a
+threshold that isn't just eyeballed, and being honest when a technique
+(kurtogram band selection) that's supposed to fix a problem doesn't
+actually fix it for one of the four fault classes.
+
+The most useful debugging lesson was the kurtosis-vs-spectral-kurtosis mixup.
+`kurtosis(envelope)` and Antoni's actual spectral kurtosis formula look like
+they should give the same answer, and they don't — the plain kurtosis version
+kept picking the band *next to* the real resonance instead of the resonance
+itself, because a transient leaking through a filter's skirt looks sparser
+(and so "more impulsive") than the fuller signal inside the true band. I only
+caught this because I built a synthetic signal where I knew the right answer
+in advance and checked the algorithm against it, which is now baked into the
+script as a permanent regression test. That's probably the real takeaway:
+for a signal-processing method, trust it exactly as much as you've verified
+it on a case where you already know the answer.
